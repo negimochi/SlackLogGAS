@@ -6,6 +6,9 @@ var FOLDER_ID = PropertiesService.getScriptProperties().getProperty('folder_id')
 if (!FOLDER_ID) {
     throw 'You should set "folder_id" property from [File] > [Project properties] > [Script properties]';
 }
+if (typeof(Drive) === 'undefined') {
+    throw 'You should turn on Drive API v2 from [Resources] > [Advanced Google services...]';
+}
 
 function FindOrCreateFolder(folder, folderName) 
 {
