@@ -9,6 +9,8 @@ if (!FOLDER_ID) {
 if (typeof(Drive) === 'undefined') {
     throw 'You should turn on Drive API v2 from [Resources] > [Advanced Google services...]';
 }
+var SUBFOLDER_NAME = "SlackLog";
+var SPREADSHEET_NAME = "LogData";
 
 function FindOrCreateFolder(folder, folderName) 
 {
@@ -288,8 +290,8 @@ var SpreadsheetController = (function() {
 
 function Run()
 {
-  var folder = FindOrCreateFolder(DriveApp.getFolderById(FOLDER_ID), "SlackLog");
-  var ss = FindOrCreateSpreadsheet(folder, "LogData");
+  var folder = FindOrCreateFolder(DriveApp.getFolderById(FOLDER_ID), SUBFOLDER_NAME);
+  var ss = FindOrCreateSpreadsheet(folder, SPREADSHEET_NAME);
   
   var ssCtrl = new SpreadsheetController(ss, folder);
   var slack = new SlackAccessor(API_TOKEN);
