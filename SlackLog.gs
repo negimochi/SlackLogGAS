@@ -6,6 +6,11 @@ var FOLDER_ID = PropertiesService.getScriptProperties().getProperty('folder_id')
 if (!FOLDER_ID) {
     throw 'You should set "folder_id" property from [File] > [Project properties] > [Script properties]';
 }
+if (typeof(Drive) === 'undefined') {
+    throw 'You should turn on Drive API v2 from [Resources] > [Advanced Google services...]';
+}
+var SUBFOLDER_NAME = "SlackLog";
+var SPREADSHEET_NAME = "LogData";
 
 function FindOrCreateFolder(folder, folderName) 
 {
@@ -103,8 +108,9 @@ var SlackAccessor = (function() {
     var response = this.requestAPI('users.list');
     var memberNames = {};
     response.members.forEach(function (member) {
-      memberNames[member.id] = member.name;
-      console.log("memberNames[" + member.id + "] = " + member.name);
+      var name = member.profile.display_name ? member.profile.display_name : member.profile.real_name;
+      memberNames[member.id] = name;
+      console.log("memberNames[" + member.id + "] = " + name);
     });
     return memberNames;
   };
@@ -257,10 +263,14 @@ var SpreadsheetController = (function() {
       var alternateLink = "";
       if(msg.upload == true) {
         url = msg.files[0].url_private_download;
-        // ダウンロードとダウンロード先
-        var file = DownloadData(url, downloadFolder, date);
-        var driveFile = Drive.Files.get(file.getId());
-        alternateLink = driveFile.alternateLink;
+        if (url === void 0) {
+          alternateLink = "(This file was deleted.)"
+        } else {
+          // ダウンロードとダウンロード先
+          var file = DownloadData(url, downloadFolder, date);
+          var driveFile = Drive.Files.get(file.getId());
+          alternateLink = driveFile.alternateLink;
+        }
       }
       row[COL_URL - 1] = url;
       row[COL_LINK - 1] = alternateLink;
@@ -275,7 +285,9 @@ var SpreadsheetController = (function() {
     {
       var range = sheet.insertRowsAfter(lastRow || 1, record.length)
                     .getRange(lastRow + 1, 1, record.length, COL_MAX);
-      range.setValues(record);    
+      // 全てのデータを文字列型で記録する (タイムスタンプが自動的に数値として扱われてしまうことを防ぐため)
+      range.setNumberFormat("@");
+      range.setValues(record);
     }
     
   };
@@ -285,8 +297,8 @@ var SpreadsheetController = (function() {
 
 function Run()
 {
-  var folder = FindOrCreateFolder(DriveApp.getFolderById(FOLDER_ID), "SlackLog");
-  var ss = FindOrCreateSpreadsheet(folder, "LogData");
+  var folder = FindOrCreateFolder(DriveApp.getFolderById(FOLDER_ID), SUBFOLDER_NAME);
+  var ss = FindOrCreateSpreadsheet(folder, SPREADSHEET_NAME);
   
   var ssCtrl = new SpreadsheetController(ss, folder);
   var slack = new SlackAccessor(API_TOKEN);
