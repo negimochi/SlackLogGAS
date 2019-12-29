@@ -285,7 +285,9 @@ var SpreadsheetController = (function() {
     {
       var range = sheet.insertRowsAfter(lastRow || 1, record.length)
                     .getRange(lastRow + 1, 1, record.length, COL_MAX);
-      range.setValues(record);    
+      // 全てのデータを文字列型で記録する (タイムスタンプが自動的に数値として扱われてしまうことを防ぐため)
+      range.setNumberFormat("@");
+      range.setValues(record);
     }
     
   };
