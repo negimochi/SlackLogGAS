@@ -263,10 +263,14 @@ var SpreadsheetController = (function() {
       var alternateLink = "";
       if(msg.upload == true) {
         url = msg.files[0].url_private_download;
-        // ダウンロードとダウンロード先
-        var file = DownloadData(url, downloadFolder, date);
-        var driveFile = Drive.Files.get(file.getId());
-        alternateLink = driveFile.alternateLink;
+        if (url === void 0) {
+          alternateLink = "(This file was deleted.)"
+        } else {
+          // ダウンロードとダウンロード先
+          var file = DownloadData(url, downloadFolder, date);
+          var driveFile = Drive.Files.get(file.getId());
+          alternateLink = driveFile.alternateLink;
+        }
       }
       row[COL_URL - 1] = url;
       row[COL_LINK - 1] = alternateLink;
