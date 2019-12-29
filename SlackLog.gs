@@ -108,8 +108,9 @@ var SlackAccessor = (function() {
     var response = this.requestAPI('users.list');
     var memberNames = {};
     response.members.forEach(function (member) {
-      memberNames[member.id] = member.name;
-      console.log("memberNames[" + member.id + "] = " + member.name);
+      var name = member.profile.display_name ? member.profile.display_name : member.profile.real_name;
+      memberNames[member.id] = name;
+      console.log("memberNames[" + member.id + "] = " + name);
     });
     return memberNames;
   };
